@@ -1,10 +1,13 @@
 package com.diganta.service;
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.diganta.entity.Category;
+import com.diganta.exception.CategoryAlreadyExists;
 import com.diganta.repository.ICategoryRepository;
 
 import lombok.AllArgsConstructor;
@@ -17,6 +20,10 @@ public class CategoryService implements ICategoryService {
 
 	@Override
 	public Category createCategory(Category category) {
+		Optional<Category> prod = categoryRepo.findByCategoryName(category.getCategoryName());
+		if (prod.isPresent()) {
+			throw new CategoryAlreadyExists("Category already exists.");
+		}
 		return categoryRepo.save(category);
 	}
 
@@ -40,7 +47,7 @@ public class CategoryService implements ICategoryService {
 
 	@Override
 	public Category getCategoryById(int cId) {
-		return categoryRepo.findById(cId).orElse(null);
+		return categoryRepo.findById(cId).orElseThrow(() -> new IllegalArgumentException("Category not found"));
 	}
 
 	@Override
